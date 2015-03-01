@@ -3,6 +3,7 @@
 import os
 import subprocess
 import sys
+import os.path
 
 class bcolors:
     HEADER = '\033[95m'
@@ -15,7 +16,21 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 def get_keywords():
-	return {'.java': ['exp', 'print', 'TODO'], '.txt': ['testing', 'xpto']}
+	keywords = {}
+	if os.path.isfile('keywords.conf'):
+		print bcolors.OKGREEN +  "Using user provided configurations" + bcolors.ENDC
+		f = open('keywords.conf', 'r')
+		for line in f:
+			line = line.rstrip('\n')
+			arr = line.split(',')
+			extension = arr[0]
+			words = arr[1:]
+			keywords[extension] = words
+	else:
+		print bcolors.WARNING + "No 'keywords.conf' file. Using default configurations" +  bcolors.ENDC
+		keywords = {'.java': ['print', 'TODO'], '.py': ['print', 'TODO']}
+
+	return keywords
 
 def get_commit_hash():
 	FNULL = open(os.devnull, 'w')
