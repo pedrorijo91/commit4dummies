@@ -17,8 +17,8 @@ Example configuration file ('keywords.conf') with unrealistic examples just for 
   * exp
   * print
   * TODO
-  * AHAHAHA
+  * foo 
 * .txt files
   * testing
   * xpto
-  * AHAHAHA
+  * bar
