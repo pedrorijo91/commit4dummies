@@ -53,7 +53,7 @@ def analyse_line(line):
 	return status, filename
 
 def execute_grep(keyword, filename):
-	grepResult = subprocess.Popen(['grep', '-n', keyword, filename], stdout=subprocess.PIPE) 
+	grepResult = subprocess.Popen(['git', 'grep', '-n', keyword, filename], stdout=subprocess.PIPE)
 	output = grepResult.stdout.read()
 	code = grepResult.poll()
 
@@ -83,6 +83,12 @@ def prompt_exit():
 	print "Invalid answear '" + ans + "'. Please answear 'y' or 'n'."
 	prompt_exit()
 
+def exit(code):
+    subprocess.call(['git', 'reset', '--hard'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    subprocess.call(['git', 'stash', 'pop', '--quiet', '--index'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    sys.exit(code)
+
+subprocess.call(['git', 'stash', '-u', '--keep-index'], stdout=subprocess.PIPE)
 
 keywords = get_keywords()
 
@@ -94,15 +100,16 @@ for line in files.splitlines():
 		for extension in keywords:
 			if filename.endswith(extension):
 				for keyword in keywords[extension]:
-					
+
 					output, code = execute_grep(keyword, filename)
 
 					if code == 0: # res == 0 => find
 						output_finding(keyword, filename, output)
 						if prompt_exit():
 							print "Aborting commit..."
-							sys.exit(1)
+							exit(1)
 					else: # res != 0 => not find
 						output_no_finding(keyword, filename)
+
 print "Successfully ending hook"
-sys.exit(0)
+exit(0)
