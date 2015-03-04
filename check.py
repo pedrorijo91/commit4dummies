@@ -92,30 +92,33 @@ def exit_handler():
     subprocess.call(['git', 'reset', '--hard'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     subprocess.call(['git', 'stash', 'pop', '--quiet', '--index'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-atexit.register(exit_handler)
+def init():
+	atexit.register(exit_handler)
+	subprocess.call(['git', 'stash', '-u', '--keep-index'], stdout=subprocess.PIPE)
+	
+def main():
+	init()
+	
+	keywords = get_keywords()
+	files = get_files()
 
-subprocess.call(['git', 'stash', '-u', '--keep-index'], stdout=subprocess.PIPE)
+	for line in files.splitlines():
+		status, filename = analyse_line(line)
+		if status <> 'D':
+			for extension in keywords:
+				if filename.endswith(extension):
+					for keyword in keywords[extension]:
+						output, code = execute_grep(keyword, filename)
 
-keywords = get_keywords()
+						if code == 0: # res == 0 => find
+							output_finding(keyword, filename, output)
+							if prompt_exit():
+								print "Aborting commit..."
+								exit(1)
+						else: # res != 0 => not find
+							output_no_finding(keyword, filename)
 
-files = get_files()
-for line in files.splitlines():
-	status, filename = analyse_line(line)
+	print "Successfully ending hook"
+	exit(0)
 
-	if status <> 'D':
-		for extension in keywords:
-			if filename.endswith(extension):
-				for keyword in keywords[extension]:
-
-					output, code = execute_grep(keyword, filename)
-
-					if code == 0: # res == 0 => find
-						output_finding(keyword, filename, output)
-						if prompt_exit():
-							print "Aborting commit..."
-							exit(1)
-					else: # res != 0 => not find
-						output_no_finding(keyword, filename)
-
-print "Successfully ending hook"
-exit(0)
+main()
