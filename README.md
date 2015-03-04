@@ -17,8 +17,12 @@ Example configuration file ('keywords.conf') with unrealistic examples just for 
   * exp
   * print
   * TODO
-  * foo 
+  * foo
 * .txt files
   * testing
   * xpto
   * bar
+
+> **Note:** Remember to make hook runnable. The following code should be enough
+
+    chmod +x pre-commit

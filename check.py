@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 import os.path
+import atexit
 
 class bcolors:
     HEADER = '\033[95m'
@@ -84,9 +85,14 @@ def prompt_exit():
 	prompt_exit()
 
 def exit(code):
+    sys.exit(code)
+
+def exit_handler():
+    print "Reverting git stash command" 
     subprocess.call(['git', 'reset', '--hard'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     subprocess.call(['git', 'stash', 'pop', '--quiet', '--index'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    sys.exit(code)
+
+atexit.register(exit_handler)
 
 subprocess.call(['git', 'stash', '-u', '--keep-index'], stdout=subprocess.PIPE)
 
